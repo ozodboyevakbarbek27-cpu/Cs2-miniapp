@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d17">
+<title>CS2 GAMER</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+:root {
+  --bg: #080d17;
+  --panel: #111a29;
+  --panel2: #172338;
+  --blue: #39a9ff;
+  --text: #f3f7ff;
+  --muted: #9aa9c0;
+  --border: #263750;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+header {
+  padding: 22px 16px 15px;
+  background: linear-gradient(135deg, #102541, #101322 70%);
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+h1 { margin: 8px 0; font-size: 27px; }
+header p { margin: 0; color: var(--muted); font-size: 13px; }
+.search-wrap { padding: 14px 14px 4px; }
+input {
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  color: white;
+  outline: none;
+  font-size: 15px;
+}
+.section-title {
+  padding: 17px 15px 10px;
+  font-size: 14px;
+  font-weight: bold;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 12px;
+}
+.card {
+  min-height: 104px;
+  text-align: left;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+}
+.card:active { background: var(--panel2); }
+.card .emoji { font-size: 25px; display: block; margin-bottom: 10px; }
+.card strong { display: block; font-size: 13px; }
+.card small { display: block; margin-top: 5px; color: var(--muted); }
+#detail {
+  display: none;
+  padding: 16px;
+}
+#detail h2 { font-size: 22px; }
+.content-card {
+  padding: 15px;
+  margin: 10px 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.action {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel2);
+  color: white;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.primary {
+  background: var(--blue);
+  color: #06101c;
+  border: 0;
+  font-weight: bold;
+  text-align: center;
+}
+footer {
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+  padding: 25px 10px;
+}
+#back { margin-bottom: 15px; }
+.hidden { display: none !important; }
+</style>
+</head>
+
+<body>
+<header>
+  <div class="logo">COUNTER-STRIKE 2</div>
+  <h1>CS2 GAMER</h1>
+  <p>Maps · Skins · Crosshair · Esports</p>
+</header>
+
+<main id="home">
+  <div class="search-wrap">
+    <input id="search" placeholder="🔎 Bo‘lim qidirish..." oninput="filterCards()">
+  </div>
+
+  <div class="section-title">ASOSIY BO‘LIMLAR</div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<section id="detail">
+  <button class="action" id="back" onclick="showHome()">← Bosh menyu</button>
+  <div id="detailContent"></div>
+</section>
+
+<footer>CS2 GAMER · Telegram Mini App</footer>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+const sections = [
+  ["🗺","Xaritalar","10+ CS2 xaritasi","maps"],
+  ["🖼","Rasmlar kategoriyalari","Xaritalar, qurollar va agentlar","images"],
+  ["🎨","Skinlar","Qurol skinlarini qidirish","skins"],
+  ["💰","Skin narxlari","Steam Market orqali ko‘rish","prices"],
+  ["🎯","Crosshair","Nishon sozlamalari","crosshair"],
+  ["🏆","Ranklar","Competitive va Premier","ranks"],
+  ["👤","Agentlar","Agentlar haqida","agents"],
+  ["💡","Pro Tips","Foydali maslahatlar","tips"],
+  ["📚","Terminlar","CS2 atamalari","terms"],
+  ["🎮","Practice","Mashg‘ulot rejasi","practice"],
+  ["📰","Yangiliklar","Rasmiy yangiliklar","news"],
+  ["🏅","Turnirlar","Esports va musobaqalar","tournaments"],
+  ["▶️","YouTube qidiruv","CS2 videolarini topish","youtube"],
+  ["🔎","Google qidiruv","Internetdan qidirish","google"],
+  ["🎲","Random","Tasodifiy tavsiya","random"],
+  ["👤","Profil","Telegram profiling","profile"],
+  ["🆔","Telegram ID","Hisob identifikatori","id"],
+  ["❓","FAQ","Ko‘p beriladigan savollar","faq"],
+  ["📊","Statistika","Profil statistikasi","stats"],
+  ["⚙️","Sozlamalar","Ilova sozlamalari","settings"],
+  ["🌐","Official CS2","Rasmiy Counter-Strike sayti","official"],
+  ["🔙","Menyu","Bosh sahifaga qaytish","menu"],
+  ["🔄","Yangilash","Ilovani qayta yuklash","refresh"]
+];
+
+const maps = [
+  ["Mirage","Mid, A va B yo‘nalishlari."],
+  ["Dust II","Long, Mid va B tunnel."],
+  ["Inferno","Banana, Apartments va bombsite."],
+  ["Nuke","Yuqori va pastki bombsite."],
+  ["Ancient","Mid va tor yo‘laklar."],
+  ["Anubis","Mid va kanal yo‘nalishlari."],
+  ["Overpass","Connector va uzun yo‘laklar."],
+  ["Vertigo","Balandlik va vertikal harakat."],
+  ["Train","Vagonlar va temiryo‘l yo‘laklari."],
+  ["Office","Garovdagilarni qutqarish xaritasi."]
+];
+
+const ranks = [
+  "Silver I","Silver II","Silver III","Silver IV",
+  "Silver Elite","Silver Elite Master",
+  "Gold Nova I","Gold Nova II","Gold Nova III",
+  "Gold Nova Master","Master Guardian I",
+  "Master Guardian II","Master Guardian Elite",
+  "Distinguished Master Guardian","Legendary Eagle",
+  "Legendary Eagle Master","Supreme Master First Class",
+  "The Global Elite"
+];
+
+const tips = [
+  "Nishonni bosh balandligida ushla.",
+  "Raund boshida jamoang bilan reja tuz.",
+  "Keraksiz paytda yugurib, o‘z joylashuvingni oshkor qilma.",
+  "Smoke va flash granatalarini mashq qil.",
+  "Pulni jamoa bilan kelishib sarfla.",
+  "Raunddan keyin xatolaringni tahlil qil.",
+  "Burchaklarni tekshirib, shoshilmasdan harakat qil."
+];
+
+const terms = [
+  ["Ace","Bitta o‘yinchi raundda beshta raqibni yengishi."],
+  ["Clutch","Kamchilikdagi vaziyatda raundni yutish."],
+  ["Eco","Pulni tejash uchun arzon xaridli raund."],
+  ["Entry","Bombsite’ga birinchi kirib, jang boshlaydigan o‘yinchi."],
+  ["Flank","Raqibga yon yoki orqa tomondan yaqinlashish."],
+  ["Retake","Raqib egallagan bombsite’ni qaytarib olish."],
+  ["Save","Qurol va jihozlarni keyingi raund uchun saqlash."],
+  ["Utility","Smoke, flash, HE va molotov kabi granatalar."]
+];
+
+function cardHTML(s) {
+  return `<button class="card" data-name="${s[1].toLowerCase()}"
+    onclick="openSection('${s[3]}')">
+    <span class="emoji">${s[0]}</span>
+    <strong>${s[1]}</strong><small>${s[2]}</small>
+  </button>`;
+}
+
+function renderCards() {
+  document.getElementById("grid").innerHTML = sections.map(cardHTML).join("");
+}
+renderCards();
+
+function filterCards() {
+  const q = document.getElementById("search").value.toLowerCase();
+  document.querySelectorAll(".card").forEach(card => {
+    card.classList.toggle("hidden", !card.dataset.name.includes(q));
+  });
+}
+
+function showHome() {
+  document.getElementById("home").style.display = "block";
+  document.getElementById("detail").style.display = "none";
+  document.getElementById("search").value = "";
+  filterCards();
+  window.scrollTo(0, 0);
+}
+
+function escapeHTML(text) {
+  return String(text).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function box(title, text) {
+  return `<div class="content-card"><strong>${title}</strong><br>${text}</div>`;
+}
+
+function linkButton(label, url) {
+  return `<a class="action" href="${url}" target="_blank"
+    rel="noopener noreferrer">${label} ↗</a>`;
+}
+
+function openSection(id) {
+  if (id === "menu") return showHome();
+  if (id === "refresh") return location.reload();
+
+  document.getElementById("home").style.display = "none";
+  document.getElementById("detail").style.display = "block";
+
+  let html = "";
+  const user = tg.initDataUnsafe?.user;
+
+  switch(id) {
+    case "maps":
+      html = "<h2>🗺 CS2 xaritalari</h2>" +
+        maps.map(m => box(m[0], m[1])).join("");
+      break;
+
+    case "images":
+      html = "<h2>🖼 Rasmlar kategoriyalari</h2>" +
+        linkButton("🗺 Xaritalar rasmlari",
+          "https://www.google.com/search?tbm=isch&q=CS2+maps") +
+        linkButton("🔫 Qurol skinlari",
+          "https://www.google.com/search?tbm=isch&q=CS2+weapon+skins") +
+        linkButton("👤 Agentlar rasmlari",
+          "https://www.google.com/search?tbm=isch&q=CS2+agents") +
+        linkButton("🎯 Crosshair rasmlari",
+          "https://www.google.com/search?tbm=isch&q=CS2+crosshair");
+      break;
+
+    case "skins":
+      html = "<h2>🎨 Skinlar</h2>" +
+        box("AK-47","AK-47 skinlarini qidirish") +
+        box("AWP","AWP skinlarini qidirish") +
+        box("M4A1-S","M4A1-S skinlarini qidirish") +
+        box("Karambit","Pichoq skinlarini qidirish") +
+        linkButton("🔎 Steam Market — CS2 skinlari",
+          "https://steamcommunity.com/market/search?appid=730");
+      break;
+
+    case "prices":
+      html = "<h2>💰 Skin narxlari</h2>" +
+        box("Narxlar","Narxlar o‘zgarib turadi. Eng so‘nggi qiymatni Steam Marketda tekshir.") +
+        linkButton("🛒 CS2 Steam Market",
+          "https://steamcommunity.com/market/search?appid=730");
+      break;
+
+    case "crosshair":
+      html = "<h2>🎯 Crosshair</h2>" +
+        box("Namuna 1",
+          "<code>cl_crosshairstyle 4</code><br>" +
+          "<code>cl_crosshairsize 2</code><br>" +
+          "<code>cl_crosshairgap -2</code><br>" +
+          "<code>cl_crosshairthickness 0.5</code>") +
+        box("Namuna 2",
+          "<code>cl_crosshairstyle 4</code><br>" +
+          "<code>cl_crosshairsize 1.5</code><br>" +
+          "<code>cl_crosshairgap -3</code>") +
+        box("Eslatma","Kodlarni CS2 konsolida ishlat. Sozlamalar o‘yin versiyasiga bog‘liq bo‘lishi mumkin.");
+      break;
+
+    case "ranks":
+      html = "<h2>🏆 Competitive ranklar</h2>" +
+        ranks.map((r,i) => box((i+1)+". "+r,"Competitive rank")).join("") +
+        box("Premier","Premier rejimida alohida CS Rating ishlatiladi.");
+      break;
+
+    case "agents":
+      html = "<h2>👤 Agentlar</h2>" +
+        box("Terrorist va Counter-Terrorist",
+          "Agent modellari o‘yin tomoniga va mavjud skinlarga bog‘liq.") +
+        linkButton("🔎 Agentlarni ko‘rish",
+          "https://www.google.com/search?q=CS2+agents");
+      break;
+
+    case "tips":
+      html = "<h2>💡 Pro Tips</h2>" +
+        tips.map((t,i) => box("Maslahat "+(i+1),t)).join("");
+      break;
+
+    case "terms":
+      html = "<h2>📚 CS2 terminlari</h2>" +
+        terms.map(t => box(t[0],t[1])).join("");
+      break;
+
+    case "practice":
+      html = "<h2>🎮 Practice</h2>" +
+        box("5 daqiqa","Aim va nishonni bosh balandligida ushlash.") +
+        box("5 daqiqa","Spray nazoratini mashq qilish.") +
+        box("5 daqiqa","Smoke va flash granatalarini mashq qilish.") +
+        box("10 daqiqa","Deathmatch o‘ynab, harakatni mashq qilish.");
+      break;
+
+    case "news":
+      html = "<h2>📰 Yangiliklar</h2>" +
+        linkButton("🌐 Rasmiy CS2 yangiliklari",
+          "https://www.counter-strike.net/news") +
+        linkButton("📰 Steam yangiliklari",
+          "https://store.steampowered.com/news/app/730");
+      break;
+
+    case "tournaments":
+      html = "<h2>🏅 Turnirlar</h2>" +
+        linkButton("🏆 HLTV matchlari","https://www.hltv.org/matches") +
+        linkButton("📈 Jamoalar reytingi","https://www.hltv.org/ranking/teams") +
+        linkButton("🏅 Liquipedia","https://liquipedia.net/counterstrike/Main_Page");
+      break;
+
+    case "youtube":
+      html = "<h2>▶️ YouTube qidiruv</h2>" +
+        `<form onsubmit="event.preventDefault();searchWeb('https://www.youtube.com/results?search_query=',this.q.value)">
+        <input name="q" placeholder="Masalan: Mirage smokes">
+        <button class="action primary">Qidirish</button></form>`;
+      break;
+
+    case "google":
+      html = "<h2>🔎 Google qidiruv</h2>" +
+        `<form onsubmit="event.preventDefault();searchWeb('https://www.google.com/search?q=',this.q.value)">
+        <input name="q" placeholder="Nimani qidiramiz?">
+        <button class="action primary">Qidirish</button></form>`;
+      break;
+
+    case "random":
+      const m = maps[Math.floor(Math.random()*maps.length)];
+      const t = tips[Math.floor(Math.random()*tips.length)];
+      html = "<h2>🎲 Random</h2>" +
+        box("Tasodifiy xarita",m[0]+" — "+m[1]) +
+        box("Tasodifiy maslahat",t) +
+        '<button class="action primary" onclick="openSection(\'random\')">🔄 Yana tanlash</button>';
+      break;
+
+    case "profile":
+      html = "<h2>👤 Profil</h2>" +
+        box("Ism",escapeHTML(user?.first_name || "Telegram ichida oching")) +
+        box("Username",escapeHTML(user?.username ? "@"+user.username : "Mavjud emas")) +
+        box("Telegram ID",escapeHTML(user?.id || "Ma'lumot mavjud emas")) +
+        box("Eslatma","Bu Telegram profilingiz. Steam/FACEIT statistikasi emas.");
+      break;
+
+    case "id":
+      html = "<h2>🆔 Telegram ID</h2>" +
+        box("ID",escapeHTML(user?.id || "Telegram orqali oching")) +
+        box("Maxfiylik","Telegram ID parol emas, ammo uni ommaviy joylarda ulashishda ehtiyot bo‘ling.");
+      break;
+
+    case "faq":
+      html = "<h2>❓ FAQ</h2>" +
+        box("Mini App nima?","Telegram ichida ochiladigan web-ilova.") +
+        box("Skin narxlari jonlimi?","Bu versiya Steam Marketga yo‘naltiradi; narxlar ilova ichida avtomatik olinmaydi.") +
+        box("Statistika ishlaydimi?","Hozircha jonli Steam/FACEIT API ulanmagan.") +
+        box("Qanday qaytaman?","Bosh menyu tugmasini bosing.");
+      break;
+
+    case "stats":
+      html = "<h2>📊 Statistika</h2>" +
+        box("Telegram","Profil va ID Telegram Web App orqali olinadi.") +
+        box("CS2 / FACEIT","Haqiqiy o‘yin statistikasi uchun alohida API integratsiyasi kerak.") +
+        linkButton("🔎 FACEIT profilini qidirish",
+          "https://www.google.com/search?q=FACEIT+CS2+profile");
+      break;
+
+    case "settings":
+      html = "<h2>⚙️ Sozlamalar</h2>" +
+        box("Til","O‘zbekcha") +
+        box("Ko‘rinish","To‘q rangli mavzu") +
+        '<button class="action" onclick="tg.expand()">📱 Ilovani kengaytirish</button>';
+      break;
+
+    case "official":
+      html = "<h2>🌐 Official CS2</h2>" +
+        linkButton("Counter-Strike rasmiy sayti",
+          "https://www.counter-strike.net/") +
+        linkButton("CS2 Steam sahifasi",
+          "https://store.steampowered.com/app/730/CounterStrike_2/");
+      break;
+  }
+
+  document.getElementById("detailContent").innerHTML = html;
+  window.scrollTo(0,0);
+}
+
+function searchWeb(base, query) {
+  if (!query.trim()) return;
+  window.open(base + encodeURIComponent(query), "_blank");
+}
+
+tg.BackButton.show();
+tg.BackButton.onClick(showHome);
+</script>
+</body>
+</html>
